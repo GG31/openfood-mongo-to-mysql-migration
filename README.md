@@ -1,3 +1,13 @@
+# Project
+This project aims to give a code base for an Flask service.
+
+# Prerequisite
+- python3
+- python3-venv
+- pip3
+- pytest
+
+# Getting started
 Create your virtual environment
 ```
 python3 -m venv venv
