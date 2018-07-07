@@ -24,7 +24,10 @@ def setup_function():
 
 def test_call_hello(client):
     result = client.get('/')
-    print(result)
     assert result.data == b'Hi Bob'
+
+def test_call_hello_with_username(client):
+    result = client.get('/Alice')
+    assert result.data == b'Hi Alice'
 
 
