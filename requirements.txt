@@ -1,3 +1,4 @@
 Flask>=1.0.2
 configparser>=3.5.0
 Flask-Injector>=0.10.1
+pytest>=3.6.3

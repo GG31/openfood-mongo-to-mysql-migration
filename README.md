@@ -14,3 +14,7 @@ Run
 ```
 python3 main.py
 ```
+Run test
+```
+pytest -v -s
+```
