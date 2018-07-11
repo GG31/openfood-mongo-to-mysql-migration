@@ -1,4 +1,5 @@
 # Scaffold
+
 ## Introduction
 This project aims to give a code base for an Flask service.
 

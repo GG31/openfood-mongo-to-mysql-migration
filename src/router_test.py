@@ -1,8 +1,7 @@
 import pytest
-from flask_injector import FlaskInjector
-from injector import singleton
+from unittest.mock import MagicMock
 
-from .router import create_router, Hello
+from .router import Router
 from .core import Logger
 import config
 
@@ -18,12 +17,12 @@ class HelloMock:
 
 @pytest.fixture(autouse=True)
 def client():
-    app = create_router(test_config, Logger('DEBUG'))
+    hello_mock = MagicMock()
+    hello_mock.say_hello = MagicMock(return_value='Hi')
+    router = Router(test_config, Logger('DEBUG'), hello=hello_mock)
+    app = router.create_router()
     app.config['TESTING'] = True
 
-    def configure(binder):
-        binder.bind(Hello, to=HelloMock('test'), scope=singleton)
-    FlaskInjector(app=app, modules=[configure])
     app_client = app.test_client()
     return app_client
 
@@ -36,5 +35,6 @@ def test_call_hello(client):
 def test_call_hello_with_username(client):
     result = client.get('/Alice')
     assert result.data == b'Hi Alice'
+
 
 

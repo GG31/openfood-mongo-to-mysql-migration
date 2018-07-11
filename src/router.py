@@ -1,14 +1,20 @@
 from flask import Flask
-from .hello import Hello
 
 
-def create_router(config, logger):
-    app = Flask(config['project']['name'])
-    logger = logger.get_logger(__name__)
+class Router:
+    def __init__(self, config, logger, hello):
+        self.__config = config
+        self.__logger = logger.get_logger(__name__)
+        self.__hello = hello
 
-    @app.route('/')
-    @app.route('/<username>')
-    def hello(hello: Hello, username='Bob'):
-        logger.info('/ called')
-        return '%s %s' % (hello.say_hello(), username)
-    return app
+    def create_router(self):
+        this = self
+        app = Flask(self.__config['project']['name'])
+
+        @app.route('/')
+        @app.route('/<username>')
+        def hello(username='Bob'):
+            this.__logger.info('/ called')
+            return '%s %s' % (this.__hello.say_hello(), username)
+
+        return app
