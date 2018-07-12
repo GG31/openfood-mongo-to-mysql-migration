@@ -1,7 +1,7 @@
-# Scaffold
+# Openfood mongo to mysql migration
 
 ## Introduction
-This project aims to give a code base for an Flask service.
+This project aims to migrate open food facts mongo database to an SQL database in order to reduce the size and cleaning the data.
 
 ## Prerequisite
 - python3
