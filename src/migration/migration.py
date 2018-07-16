@@ -1,4 +1,4 @@
-from .models import Product, Category
+from .models import Product, Category, Country, Brand
 
 
 class Migration:
@@ -15,25 +15,56 @@ class Migration:
 
         self.session = self.mysql_client.create_session(self.config['mysql']['url'])
         for mongo_product in cursor:
-            product = self.create_product(mongo_product)
-            print(product)
+            product = self.__create_product(mongo_product)
+            self.logger.info('inserting ' + str(product))
             self.mysql_client.insert(product)
         self.mysql_client.commit()
         self.logger.info('Migration finished')
 
-    def create_product(self, mongo_product):
-        categories = self.create_categories(mongo_product)
+    def __create_product(self, mongo_product):
+        categories = self.__create_categories(mongo_product)
+        origin_countries = self.__create_origin_countries(mongo_product)
+        selling_countries = self.__create_selling_countries(mongo_product)
+        brands = self.__create_brands(mongo_product)
         # TODO create all other fields
         name = mongo_product['product_name'] if 'product_name' in mongo_product else None
         language = mongo_product['lang'] if 'lang' in mongo_product else None
         barcode = mongo_product['code'] if 'code' in mongo_product else None
-        product = Product(name=name, language=language, barcode=barcode, category=categories)
+        product = Product(name=name,
+                          language=language,
+                          barcode=barcode,
+                          category=categories,
+                          origin_country=origin_countries,
+                          selling_country=selling_countries,
+                          brand=brands
+                          )
         return product
 
-    def create_categories(self, mongo_product):
-        categories = []
-        if 'categories_tags' in mongo_product and 'categories' in mongo_product:
-            for (tag, name) in zip(mongo_product['categories_tags'], mongo_product['categories'].split(',')):
-                category = self.mysql_client.get_or_create(Category, tag=tag, name=name)
-                categories.append(category)
-        return categories
+    def __create_categories(self, mongo_product):
+        origins = self.__extract_names_and_tags(mongo_product, Category, 'categories_tags', 'categories')
+        return origins
+
+    def __create_origin_countries(self, mongo_product):
+        origins = self.__extract_names_and_tags(mongo_product, Country, 'origins_tags', 'origins')
+        return origins
+
+    def __create_selling_countries(self, mongo_product):
+        selling_countries = self.__extract_names_and_tags(mongo_product, Country, 'countries_tags', 'countries')
+        return selling_countries
+
+    def __create_brands(self, mongo_product):
+        brands = self.__extract_names_and_tags(mongo_product, Brand, 'brands_tags', 'brands')
+        return brands
+
+    def __extract_names_and_tags(self, mongo_product, model_name, tags_field, names_fields):
+        if names_fields in mongo_product and tags_field in mongo_product:
+            items = self.__iterate_and_get_or_create(model_name, mongo_product[tags_field], mongo_product[names_fields].split(','))
+            return items
+        return []
+
+    def __iterate_and_get_or_create(self, model_name, tags, names):
+        items = []
+        for (tag, name) in zip(tags, names):
+            item = self.mysql_client.get_or_create(model_name, tag=tag, name=name)
+            items.append(item)
+        return items
