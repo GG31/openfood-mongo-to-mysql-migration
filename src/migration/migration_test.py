@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock, call
 from .migration import Migration
-from .models import Category, Country, Brand, Additive
+from .models import Category, Country, Brand, Additive, Ingredient
 
 import config
 
@@ -124,4 +124,20 @@ def test_migrate_with_product_additives(mongo_db, mysql_client):
     call1 = call(Additive, tag='b1')
     call2 = call(Additive, tag='b2')
     mysql_client.get_or_create.assert_has_calls([call1, call2])
+    mysql_client.commit.assert_called_once()
+
+
+products = [{
+    'product_name': 'test1',
+    'code': 'code_test',
+    'lang': 'fr',
+    'ingredients': [{'id': 'i1', 'text': 'ing1'}]
+}]
+@pytest.mark.parametrize('mongo_db', [(products)], indirect=['mongo_db'])
+def test_migrate_with_product_additives(mongo_db, mysql_client):
+    migration = Migration(test_config, MagicMock(), mongo_db, mysql_client)
+    migration.migrate()
+    mongo_db['test'].find.assert_called_once()
+    call1 = call(Ingredient, tag='i1', name='ing1')
+    mysql_client.get_or_create.assert_has_calls([call1])
     mysql_client.commit.assert_called_once()

@@ -29,6 +29,11 @@ product_additive_association_table = Table(
     Column('product_id', Integer, ForeignKey('product.id')),
     Column('additive_id', Integer, ForeignKey('additive.id'))
 )
+product_ingredient_association_table = Table(
+    'product_ingredient', Base.metadata,
+    Column('product_id', Integer, ForeignKey('product.id')),
+    Column('ingredient_id', Integer, ForeignKey('ingredient.id'))
+)
 
 
 class Product(Base):
@@ -42,4 +47,5 @@ class Product(Base):
     selling_country = relationship('Country', secondary=product_selling_association_table)
     brand = relationship('Brand', secondary=product_brand_association_table)
     additive = relationship('Additive', secondary=product_additive_association_table)
+    ingredient = relationship('Ingredient', secondary=product_ingredient_association_table)
 
