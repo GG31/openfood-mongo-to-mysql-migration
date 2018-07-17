@@ -19,7 +19,7 @@ class HelloMock:
 def client():
     hello_mock = MagicMock()
     hello_mock.say_hello = MagicMock(return_value='Hi')
-    router = Router(test_config, Logger('DEBUG'), hello=hello_mock)
+    router = Router(test_config, Logger('DEBUG'), hello=hello_mock, migration=MagicMock())
     app = router.create_router()
     app.config['TESTING'] = True
 

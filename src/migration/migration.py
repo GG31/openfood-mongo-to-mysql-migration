@@ -1,4 +1,4 @@
-from .models import Product, Category, Country, Brand
+from .models import Product, Category, Country, Brand, Additive
 
 
 class Migration:
@@ -26,6 +26,7 @@ class Migration:
         origin_countries = self.__create_origin_countries(mongo_product)
         selling_countries = self.__create_selling_countries(mongo_product)
         brands = self.__create_brands(mongo_product)
+        additives = self.__create_additives(mongo_product)
         # TODO create all other fields
         name = mongo_product['product_name'] if 'product_name' in mongo_product else None
         language = mongo_product['lang'] if 'lang' in mongo_product else None
@@ -36,7 +37,8 @@ class Migration:
                           category=categories,
                           origin_country=origin_countries,
                           selling_country=selling_countries,
-                          brand=brands
+                          brand=brands,
+                          additive=additives
                           )
         return product
 
@@ -55,6 +57,14 @@ class Migration:
     def __create_brands(self, mongo_product):
         brands = self.__extract_names_and_tags(mongo_product, Brand, 'brands_tags', 'brands')
         return brands
+
+    def __create_additives(self, mongo_product):
+        additives = []
+        if 'additives_tags' in mongo_product:
+            for additive_tag in mongo_product['additives_tags']:
+                additive = self.mysql_client.get_or_create(Additive, tag=additive_tag)
+                additives.append(additive)
+        return additives
 
     def __extract_names_and_tags(self, mongo_product, model_name, tags_field, names_fields):
         if names_fields in mongo_product and tags_field in mongo_product:
