@@ -19,11 +19,15 @@ class MySqlClient:
         self.nb_item += 1
         # if self.nb_item == self.bulk_limit:
         self.commit()
+        return item
 
     def get_or_create(self, model, **kwargs):
         query = self.mysql_session.query(model).filter_by(**kwargs)
+        print(query.count())
         if query.count() == 0:
             item = model(**kwargs)
+            item = self.insert(item)
+            print(item.id)
         else:
             item = query.one()
         return item

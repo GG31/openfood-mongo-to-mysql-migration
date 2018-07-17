@@ -1,5 +1,5 @@
 from sqlalchemy import Integer, String, Column
-from .product import Base
+from ..product_model import Base
 
 
 class Brand(Base):

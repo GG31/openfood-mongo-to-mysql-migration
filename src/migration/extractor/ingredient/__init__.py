@@ -1,0 +1,1 @@
+from .ingredient_extractor import IngredientExtractor

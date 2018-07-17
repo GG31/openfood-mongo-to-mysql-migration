@@ -2,7 +2,7 @@ from pymongo import MongoClient
 from .client import MySqlClient
 from .router import Router
 from .hello import Hello
-from .migration import Migration
+from .migration import Migration, Helper, ProductExtractor, IngredientExtractor, CountrySellingExtractor, CountryOriginExtractor, CategoryExtractor, BrandExtractor, AdditiveExtractor
 from .core import Logger
 
 
@@ -17,7 +17,18 @@ class Assembly:
     def __init_instances(self):
         self.__logger = Logger(self.__config['logger']['level'])
         self.__hello = Hello(self.__config, self.__logger)
-        self.__migration = Migration(self.__config, self.__logger, self.__open_food_facts_db, self.__mysql_client)
+        self.__helper = Helper(self.__mysql_client)
+        self.__ingredient_extractor = IngredientExtractor(self.__mysql_client)
+        self.__country_origin_extractor = CountryOriginExtractor(self.__helper)
+        self.__country_selling_extractor = CountrySellingExtractor(self.__helper)
+        self.__category_extractor = CategoryExtractor(self.__helper)
+        self.__brand_extractor = BrandExtractor(self.__helper)
+        self.__additives_extractor = AdditiveExtractor(self.__mysql_client)
+        self.__product_extractor = ProductExtractor(self.__category_extractor, self.__country_origin_extractor,
+                                                    self.__country_selling_extractor, self.__brand_extractor,
+                                                    self.__additives_extractor, self.__ingredient_extractor)
+        self.__migration = Migration(self.__config, self.__logger, self.__open_food_facts_db,
+                                     self.__mysql_client, self.__product_extractor)
         self.__router = Router(self.__config, self.__logger, self.__hello, self.__migration)
 
     def __init_connections(self):
